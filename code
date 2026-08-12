@@ -1,0 +1,98 @@
+clc;
+clear;
+close all;
+
+I = imread('C:\Users\Suraj\Desktop\Assignment\brain.jpg'); %% change the image as required
+
+if ndims(I) == 3
+    I = rgb2gray(I);
+end
+
+mask = I > 20;
+mask = bwareaopen(mask,500);
+mask = imfill(mask,"holes");
+
+bw = (I < 60) & mask;
+bw = bwareaopen(bw,100);
+
+figure 
+subplot(2,2,1)
+imshow(I)
+subplot(2,2,2)
+imshow(I)
+subplot(2,2,3)
+imshow(mask)
+subplot(2,2,4)
+imshow(bw)
+
+cc = bwconncomp(bw);
+stats = regionprops(cc,'Area','Circularity','Eccentricity','Solidity','Centroid');
+
+Tmask = false(size(I));
+Tcount = 0;
+Tarea = 0;
+
+for k = 1:cc.NumObjects
+    if stats(k).Area > 3000 && stats(k).Area < 20000 && ...
+   stats(k).Circularity > 0.35 && ...
+   stats(k).Eccentricity < 0.91 && ...
+   stats(k).Solidity > 0.25
+
+        Tmask(cc.PixelIdxList{k}) = true;
+        Tcount = Tcount + 1;
+        Tarea  = Tarea + stats(k).Area;
+    end
+end
+
+for k = 1:cc.NumObjects
+    disp(stats(k))
+end
+
+
+if Tcount > 0
+    result = 'Tumor';
+else
+    result = 'Normal';
+end
+
+
+fprintf('           MRI ANALYSIS\n');
+fprintf('Brain Area     = %.2f pixels\n',sum(mask(:)));
+fprintf('Tumor Area     = %.2f pixels\n',Tarea);
+fprintf('Tumor Count    = %d\n',Tcount);
+fprintf('Classification = %s\n',result);
+
+figure;
+
+subplot(2,2,1);
+imshow(I);
+title('Original MRI');
+
+subplot(2,2,2);
+imshow(mask);
+title('Brain Region');
+
+subplot(2,2,3);
+imshow(Tmask);
+title('Tumor Region');
+
+subplot(2,2,4);
+imshow(I);
+hold on;
+
+if Tcount > 0
+    visboundaries(Tmask,'Color','r','LineWidth',2);
+end
+
+title(['Classification: ' result]);
+hold off;
+
+figure; imshow(I); hold on;
+for k = 1:cc.NumObjects
+    regionMask = false(size(I));
+    regionMask(cc.PixelIdxList{k}) = true;
+    visboundaries(regionMask, 'Color','g');
+    text(stats(k).Centroid(1), stats(k).Centroid(2), num2str(k), ...
+        'Color','yellow','FontSize',12);
+end
+hold off;
