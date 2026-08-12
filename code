@@ -2,7 +2,7 @@ clc;
 clear;
 close all;
 
-I = imread('T_img2.jpg'); %% change the image as required
+I = imread('C:\Users\Suraj\Desktop\Assignment\brain.jpg'); %% change the image as required
 
 if ndims(I) == 3
     I = rgb2gray(I);
