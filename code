@@ -15,16 +15,6 @@ mask = imfill(mask,"holes");
 bw = (I < 60) & mask;
 bw = bwareaopen(bw,100);
 
-figure 
-subplot(2,2,1)
-imshow(I)
-subplot(2,2,2)
-imshow(I)
-subplot(2,2,3)
-imshow(mask)
-subplot(2,2,4)
-imshow(bw)
-
 cc = bwconncomp(bw);
 stats = regionprops(cc,'Area','Circularity','Eccentricity','Solidity','Centroid');
 
